@@ -1,3 +1,4 @@
+import logging
 from collections import deque
 from domain_models.decisions.feasibility import Feasibility
 from domain_models.decisions.graph import EdgeType
@@ -28,8 +29,10 @@ def find_path_with_feasibility(
         search_type=EdgeType.PROVIDES,
         traversal_state = TraversalState(), level = 0, acc_sub_paths={}) -> PathResult:
     try:
-        # we want a fully connected graph when trying to find solutions
+        # we want a fully connected graph when trying to find solutions    
         graph = filtered_graph if not traversal_state.sub_path_visited else unfiltered_graph
+        if not graph.has_node(start_node):
+            raise Exception("Starting node not found")
 
         filtered_paths = find_all_paths(
             graph, start_node, target_node, search_type)
@@ -46,8 +49,7 @@ def find_path_with_feasibility(
                 graph, traversable_paths, sub_path_traverser)
             return PathResult(path_infeasible, typed_paths, acc_sub_paths.get(target_node))
     except Exception as e:
-        print(e)
-        print("No paths found")
+       logging.error("No paths found", e)
 
     return PathResult(True, [[]], acc_sub_paths)
 
@@ -154,7 +156,7 @@ def make_sub_path_traverser(
             if level_one:
                 acc_sub_paths[node] = (acc_sub_paths.get('tmp', []) + sub_paths)
                 acc_sub_paths[node] = sorted(acc_sub_paths[node], key=lambda x: (x[2], x[3] in [Feasibility.FEASIBLE, Feasibility.ATTAINED]), reverse=True)
-                acc_sub_paths[node] = list(filter(lambda x: x[2] <= traversal_state.terminating_level + 1, acc_sub_paths[node]))
+                acc_sub_paths[node] = list(filter(lambda x: x[2] <= (traversal_state.terminating_level or 0) + 1, acc_sub_paths[node]))
 
                 del acc_sub_paths['tmp']
                 acc_sub_paths = trim_paths(acc_sub_paths[node])
