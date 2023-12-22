@@ -12,6 +12,6 @@ def get_feasibility(filtered_graph: nx.DiGraph, fully_connected_graph: nx.DiGrap
         if has_path:
             return Feasibility.FEASIBLE_IF
     except Exception as e:
-        logging.error("Error in get_feasibility", e)
+        logging.error("Error in get_feasibility", exc_info=e)
     
     return Feasibility.INFEASIBLE
