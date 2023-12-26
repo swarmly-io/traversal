@@ -183,7 +183,7 @@ def make_typed_path(filtered_graph, feasible_paths, sub_path_fn=lambda x, y: x, 
     typed_paths = []
     path_infeasible = False
     def infeasible(x): 
-        return any([False if i in [Feasibility.ATTAINED, Feasibility.FEASIBLE] else True for i in x]) 
+        return any([False if i in [Feasibility.ATTAINED, Feasibility.FEASIBLE, None] else True for i in x])
     for f in feasible_paths:
         types, edge_feasibility, props = path_edges(filtered_graph, f)
         path_infeasible = True if infeasible(edge_feasibility) or path_infeasible else False
